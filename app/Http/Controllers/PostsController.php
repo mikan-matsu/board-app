@@ -10,32 +10,39 @@ use Illuminate\Support\Facades\Storage;
 
 class PostsController extends Controller
 {
-    // POST /board/{id}/posts
+    // app/Http/Controllers/PostsController.php
     public function store(Request $request, int $id)
     {
-        // 1) バリデーション（contentに統一）
+        // 本文または画像のどちらか必須にする
         $validated = $request->validate([
-            'content' => 'required|string|max:2000',
-            'image'   => 'nullable|image|mimes:jpeg,png,webp|max:2048',
+            'content' => ['nullable','string','max:2000','required_without:image'],
+            'image'   => ['nullable','image','mimes:jpeg,png,webp','max:2048','required_without:content'],
+        ], [
+            'content.required_without' => '本文か画像のどちらかは必須です。',
+            'image.required_without'   => '本文か画像のどちらかは必須です。',
         ]);
 
-        // 2) 画像保存（必要な場合）
+        // 画像保存（あれば）
         $imagePath = null;
         if ($request->hasFile('image')) {
+            // publicディスクの images/ 配下に保存（DBには 'images/xxx.webp' の形で入る）
             $imagePath = $request->file('image')->store('images', 'public');
         }
 
-        // 3) 保存（Eloquent例）
+        // DBのcontentはNULL不可なら空文字でOKにする
+        $content = $validated['content'] ?? '';
+
         \App\Models\Post::create([
             'board_id'   => $id,
-            'user_id'    => Auth::id(),             // auth()->id()でも可
-            'name'       => Auth::user()->name,     // ← nameを必ず保存
-            'content'    => $validated['content'],
+            'user_id'    => \Auth::id(),
+            'name'       => \Auth::user()->name,
+            'content'    => $content,
             'image_path' => $imagePath,
         ]);
 
         return redirect()->route('board.show', ['id' => $id])->with('status', '投稿しました');
     }
+
 
 
     // DELETE /board/{boardId}/posts/{postId}

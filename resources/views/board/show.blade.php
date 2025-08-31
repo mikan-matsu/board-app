@@ -27,10 +27,10 @@
               </div>
               <div class="msg-body">
                 <p class="msg-text">{{ $p->body ?? $p->content ?? $p->message ?? $p->text ?? '' }}</p>
-                @php $img = $p->image_path ?? $p->image ?? null; @endphp
-                @if (!empty($img))
-                  <img class="msg-image" src="{{ asset('storage/images/'.$img) }}" alt="投稿画像">
-                @endif
+              @php $img = ltrim($p->image_path ?? '', '/'); @endphp
+              @if ($img)
+                <img class="msg-image" src="{{ '/storage/'.$img }}" alt="投稿画像">
+              @endif
               </div>
               @if ($isMine)
                 <form method="POST" action="{{ route('posts.destroy', ['boardId' => $board->id, 'postId' => $p->id]) }}" class="msg-actions">
@@ -52,6 +52,16 @@
       <div class="post-card">
         <h2 class="post-card-title">新規投稿</h2>
         <div class="post-card-meta">投稿者: {{ auth()->user()->name ?? 'guest' }}さん</div>
+        {{-- resources/views/board/show.blade.php の <form> の上あたりに追加 --}}
+        @if ($errors->any())
+          <div class="errors">
+            <ul>@foreach ($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>
+          </div>
+        @endif
+        @if (session('status'))
+          <div class="status">{{ session('status') }}</div>
+        @endif
+
         <form method="POST" action="{{ route('posts.store', ['id' => $board->id]) }}" enctype="multipart/form-data" class="post-form">
           @csrf
           <label class="form-label">本文</label>
