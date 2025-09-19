@@ -18,8 +18,14 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
-    public function boot(): void
+    public function boot()
     {
-        DB::statement("SET TIMEZONE TO 'Asia/Tokyo'");
+        if (!app()->runningInConsole()) {
+            try {
+                DB::statement("SET TIMEZONE TO 'Asia/Tokyo'");
+            } catch (\Exception $e) {
+                // ビルド時やDB未接続時は無視
+            }
+        }
     }
 }
