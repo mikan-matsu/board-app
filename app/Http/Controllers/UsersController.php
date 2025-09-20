@@ -25,9 +25,9 @@ class UsersController extends Controller
 
         // PostgreSQL: RETURNINGでid取得
         $row = DB::selectOne(
-            'insert into users (name, email, password, created_at, updated_at, update_date)
-             values (?, ?, ?, now(), now(), now())
-             returning id',
+            'insert into users (name, email, password, created_at, updated_at)
+            values (?, ?, ?, now(), now())
+            returning id',
             [$name, $email, $hashed]
         );
 
