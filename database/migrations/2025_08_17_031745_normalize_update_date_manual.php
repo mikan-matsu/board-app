@@ -14,7 +14,7 @@ return new class extends Migration {
             DB::statement('UPDATE ' . $t . ' SET update_date = NOW() WHERE update_date IS NULL;');
             DB::statement('ALTER TABLE ' . $t . ' ALTER COLUMN update_date SET NOT NULL;');
         }
-        DB::statement('DROP FUNCTION IF EXISTS set_update_date();');
+        // DB::statement('DROP FUNCTION IF EXISTS set_update_date();'); ← 削除
     }
 
     public function down(): void {
